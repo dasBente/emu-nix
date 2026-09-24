@@ -1,9 +1,5 @@
 {self, ...}: {
-  perSystem = {
-    pkgs,
-    system,
-    ...
-  }: {
+  perSystem = {pkgs, ...}: {
     checks.systems-test = pkgs.testers.nixosTest {
       name = "emu-nix.systems-test";
 
@@ -16,13 +12,24 @@
         disabled = {
           imports = [self.nixosModules.emu-nix];
         };
+
+        full = {
+          imports = [self.nixosModules.emu-nix];
+          emu-nix.systems = {
+            snes.enable = true;
+            n64.enable = true;
+            nes.enable = true;
+            gc.enable = true;
+            gbc.enable = true;
+            gba.enable = true;
+          };
+        };
       };
 
       testScript = ''
         start_all()
 
         enabled.wait_for_unit("multi-user.target")
-        disabled.wait_for_unit("multi-user.target")
 
         # check for successful retroarch install
         enabled.succeed("command -v retroarch")
@@ -31,11 +38,16 @@
 
         assert "bsnes" in closure, "bsnes core missing from retroarch closure"
 
+        disabled.wait_for_unit("multi-user.target")
         for core in ["mupen64plus", "nestopia", "dolphin", "mgba"]:
           assert core not in closure, f"{core} unexpectedly pulled into retroarch closure"
 
         # make sure retroarch doesn't install if no systems are specified
         disabled.fail("command -v retroarch")
+
+        # check if full install runs without errors
+        full.wait_for_unit("multi-user.target")
+        full.succeed("command -v retroarch")
       '';
     };
   };
