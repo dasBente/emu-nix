@@ -27,6 +27,13 @@
       });
     };
 
+    options.emu-nix.enabledSystems = lib.mkOption {
+      description = "Subset of enabled emu-nix.systems";
+      type = lib.types.attrsOf lib.types.anything;
+      readOnly = true;
+      internal = true;
+    };
+
     config = {
       # defaults
       emu-nix.systems = {
@@ -56,14 +63,15 @@
         };
       };
 
-      environment.systemPackages = let
-        filtered = lib.filterAttrs (_: {enable, ...}: enable) config.emu-nix.systems;
+      emu-nix.enabledSystems =
+        lib.filterAttrs (_: {enable, ...}: enable) config.emu-nix.systems;
 
+      environment.systemPackages = let
         retroarch =
           pkgs.retroarch.withCores
-          (_: lib.unique (lib.mapAttrsToList (_: v: v.pkg) filtered));
+          (_: lib.unique (lib.mapAttrsToList (_: v: v.pkg) config.emu-nix.enabledSystems));
       in
-        lib.mkIf (filtered != {}) [retroarch];
+        lib.mkIf (config.emu-nix.enabledSystems != {}) [retroarch];
     };
   };
 }
