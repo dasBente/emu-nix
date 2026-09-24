@@ -1,15 +1,11 @@
 {self, ...}: {
-  perSystem = {
-    pkgs,
-    system,
-    ...
-  }: {
+  perSystem = {pkgs, ...}: {
     checks.pegasus-test = pkgs.testers.nixosTest {
       name = "emu-nix.pegasus-test";
 
       nodes.enabled = {
         imports = [self.nixosModules.emu-nix];
-        pegasus.enable = true;
+        emu-nix.pegasus.enable = true;
       };
 
       testScript = ''
