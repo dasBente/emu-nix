@@ -6,7 +6,7 @@
     ...
   }: let
     skyscraperAttrs = {
-      mainOpts = {
+      main-opts = {
         inherit (config.emu-nix.pegasus) inputFolder;
         frontend = "pegasus";
       };
@@ -21,7 +21,7 @@
 
       inputFolder = lib.mkOption {
         default = "/home/<USER>/RetroPie/roms";
-        type = lib.types.string;
+        type = lib.types.str;
         description = "String path to ROM directory.";
       };
     };
