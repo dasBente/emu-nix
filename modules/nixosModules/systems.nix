@@ -23,6 +23,12 @@
             type = lib.types.str;
             description = "Core name, used to locate '<core>_libretro.so'";
           };
+
+          inputFolder = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            description = "Optional path override for ROM directory";
+          };
         };
       });
     };

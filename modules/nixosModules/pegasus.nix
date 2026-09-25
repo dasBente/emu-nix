@@ -19,12 +19,16 @@
     toPlatform = _: info: let
       exec = "/run/current-system/sw/bin/retroarch";
       core = "/run/current-system/sw/lib/retroarch/cores/${info.core}_libretro.so";
-    in {launch = "${exec} -L ${core} \"{file.path}\"";};
+    in {
+      inherit (info) inputFolder;
+      launch = "${exec} -L ${core} \"{file.path}\"";
+    };
 
     skyscraperAttrs =
       {
         main = {
           frontend = "pegasus";
+          inputFolder = config.emu-nix.pegasus.inputFolder;
         };
       }
       // (lib.mapAttrs toPlatform config.emu-nix.enabledSystems);
@@ -39,7 +43,7 @@
     options.emu-nix.pegasus = {
       enable = lib.mkEnableOption "Install pegasus frontend";
 
-      romPath = lib.mkOption {
+      inputFolder = lib.mkOption {
         default = "/home/<USER>/RetroPie/roms";
         type = lib.types.string;
         description = "String path to ROM directory.";
