@@ -25,8 +25,8 @@
           };
 
           inputFolder = lib.mkOption {
-            type = lib.types.nullOr lib.types.str;
-            default = null;
+            type = lib.types.str;
+            default = "";
             description = "Optional path override for ROM directory";
           };
         };

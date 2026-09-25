@@ -6,6 +6,9 @@
       nodes.enabled = {
         imports = [self.nixosModules.emu-nix];
         emu-nix.pegasus.enable = true;
+
+        # install a system to check if config generates correctly
+        emu-nix.systems.snes.enable = true;
       };
 
       testScript = ''

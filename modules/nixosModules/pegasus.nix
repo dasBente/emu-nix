@@ -7,8 +7,8 @@
   }: let
     skyscraper-sh = pkgs.callPackage ../packages/Skyscraper/default.nix {
       mainOpts = {
+        inherit (config.emu-nix.pegasus) inputFolder;
         frontend = "pegasus";
-        inputFolder = config.emu-nix.pegasus.inputFolder;
       };
       platform-opts = config.emu-nix.enabledSystems;
     };

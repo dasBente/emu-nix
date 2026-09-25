@@ -22,7 +22,6 @@
     exec = "/run/current-system/sw/bin/retroarch";
     core = "/run/current-system/sw/lib/retroarch/cores/${info.core}_libretro.so";
   in {
-    inherit (info) inputFolder;
     launch = "${exec} -L ${core} \"{file.path}\"";
   };
 
