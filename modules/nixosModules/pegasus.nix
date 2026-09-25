@@ -20,8 +20,8 @@
       enable = lib.mkEnableOption "Install pegasus frontend";
 
       inputFolder = lib.mkOption {
-        default = "/home/<USER>/RetroPie/roms";
-        type = lib.types.str;
+        default = null;
+        type = lib.types.nullOr lib.types.str;
         description = "String path to ROM directory.";
       };
     };

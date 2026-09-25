@@ -9,12 +9,14 @@
       platform-opts ? {},
       ...
     }: let
+      sanitize = attrs: lib.filterAttrs (_: v: v != null) attrs;
+
       attrsToIni = attrs: let
         toOption = opt: value: "${opt}=\"${value}\"";
         toLevel = lvl: options:
           lib.concatStringsSep
           "\n"
-          (["[${lvl}]"] ++ lib.mapAttrsToList toOption options);
+          (["[${lvl}]"] ++ lib.mapAttrsToList toOption (sanitize options));
       in
         lib.concatStringsSep
         "\n\n"
@@ -23,11 +25,13 @@
       handleLibretro = _: info: let
         exec = "/run/current-system/sw/bin/retroarch";
         core = "/run/current-system/sw/lib/retroarch/cores/${info.core}_libretro.so";
-      in {
-        launch = ''${exec} -L ${core} \"{file.path}\"'';
-      };
+      in
+        sanitize {
+          launch = ''${exec} -L ${core} \"{file.path}\"'';
+          inputFolder = info.inputFolder;
+        };
 
-      opts = {main = main-opts;} // (lib.mapAttrs handleLibretro platform-opts);
+      opts = {main = sanitize main-opts;} // (lib.mapAttrs handleLibretro platform-opts);
       skyscraper-config = writeText "skyscraper-config.ini" (attrsToIni opts);
     in
       writeShellScriptBin "Skyscraper" ''
