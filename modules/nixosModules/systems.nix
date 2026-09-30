@@ -1,8 +1,11 @@
 {
+  lib,
+  self,
+  ...
+}: {
   flake.nixosModules.emu-nix = {
     pkgs,
     config,
-    lib,
     ...
   }: {
     options.emu-nix.systems = lib.mkOption {
@@ -14,14 +17,9 @@
         options = {
           enable = lib.mkEnableOption "this emulator";
 
-          pkg = lib.mkOption {
-            type = lib.types.package;
-            description = "The libretro core package.";
-          };
-
-          core = lib.mkOption {
-            type = lib.types.str;
-            description = "Core name, used to locate '<core>_libretro.so'";
+          emulator = lib.mkOption {
+            type = lib.types.attrs;
+            description = "Definition of the emulator to use";
           };
 
           inputFolder = lib.mkOption {
@@ -43,39 +41,46 @@
     config = {
       # defaults
       emu-nix.systems = {
-        n64 = {
-          pkg = lib.mkDefault pkgs.libretro.mupen64plus;
-          core = lib.mkDefault "mupen64plus_next";
-        };
-        snes = {
-          pkg = lib.mkDefault pkgs.libretro.bsnes;
-          core = lib.mkDefault "bsnes";
-        };
-        nes = {
-          pkg = lib.mkDefault pkgs.libretro.nestopia;
-          core = lib.mkDefault "nestopia";
-        };
-        gc = {
-          pkg = lib.mkDefault pkgs.libretro.dolphin;
-          core = lib.mkDefault "dolphin";
-        };
-        gba = {
-          pkg = lib.mkDefault pkgs.libretro.mgba;
-          core = lib.mkDefault "mgba";
-        };
-        gbc = {
-          pkg = lib.mkDefault pkgs.libretro.mgba;
-          core = lib.mkDefault "mgba";
-        };
+        n64.emulator = lib.mkDefault (self.lib.mkLibretro {
+          pkg = pkgs.libretro.mupen64plus;
+          core = "mupen64plus_next";
+        });
+
+        snes.emulator = lib.mkDefault (self.lib.mkLibretro {
+          pkg = pkgs.libretro.bsnes;
+          core = "bsnes";
+        });
+
+        nes.emulator = lib.mkDefault (self.lib.mkLibretro {
+          pkg = pkgs.libretro.nestopia;
+          core = "nestopia";
+        });
+
+        gc.emulator = lib.mkDefault (self.lib.mkLibretro {
+          pkg = pkgs.libretro.dolphin;
+          core = "dolphin";
+        });
+
+        gba.emulator = lib.mkDefault (self.lib.mkLibretro {
+          pkg = pkgs.libretro.mgba;
+          core = "mgba";
+        });
+
+        gbc.emulator = lib.mkDefault (self.lib.mkLibretro {
+          pkg = pkgs.libretro.mgba;
+          core = "mgba";
+        });
       };
 
       emu-nix.enabledSystems =
         lib.filterAttrs (_: {enable, ...}: enable) config.emu-nix.systems;
 
       environment.systemPackages = let
+        retroarchCores = lib.filterAttrs (_: opts: opts.emulator.kind == "libretro") config.emu-nix.enabledSystems;
+
         retroarch =
           pkgs.retroarch.withCores
-          (_: lib.unique (lib.mapAttrsToList (_: v: v.pkg) config.emu-nix.enabledSystems));
+          (_: lib.unique (lib.mapAttrsToList (_: v: v.emulator.pkg) retroarchCores));
       in
         lib.mkIf (config.emu-nix.enabledSystems != {}) [retroarch];
     };

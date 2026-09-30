@@ -22,16 +22,23 @@
         "\n\n"
         (lib.mapAttrsToList toLevel attrs);
 
-      handleLibretro = _: info: let
-        exec = "/run/current-system/sw/bin/retroarch";
-        core = "/run/current-system/sw/lib/retroarch/cores/${info.core}_libretro.so";
-      in
+      toLaunchCmd = {
+        kind,
+        emulator,
+        ...
+      }:
+        {
+          libretro = ''/run/current-system/sw/bin/retroarch -L ${emulator.core} \"{file.path}\"'';
+          basic = emulator.cmd;
+        }."${kind}";
+
+      parseOpts = _: info:
         sanitize {
-          launch = ''${exec} -L ${core} \"{file.path}\"'';
-          inputFolder = info.inputFolder;
+          launch = toLaunchCmd info;
+          inputFolder = info.inputFolder or null;
         };
 
-      opts = {main = sanitize main-opts;} // (lib.mapAttrs handleLibretro platform-opts);
+      opts = {main = sanitize main-opts;} // (lib.mapAttrs parseOpts platform-opts);
       skyscraper-config = writeText "skyscraper-config.ini" (attrsToIni opts);
     in
       writeShellScriptBin "Skyscraper" ''
