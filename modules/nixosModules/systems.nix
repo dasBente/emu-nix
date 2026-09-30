@@ -49,7 +49,7 @@
         };
         snes = {
           pkg = lib.mkDefault pkgs.libretro.bsnes;
-          core = lib.mkDefault "snes9x";
+          core = lib.mkDefault "bsnes";
         };
         nes = {
           pkg = lib.mkDefault pkgs.libretro.nestopia;
