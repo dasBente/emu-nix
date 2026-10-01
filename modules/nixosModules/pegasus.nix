@@ -1,4 +1,8 @@
-{withSystem, ...}: {
+{
+  withSystem,
+  self,
+  ...
+}: {
   flake.nixosModules.emu-nix = {
     pkgs,
     lib,
@@ -12,8 +16,11 @@
       };
       platform-opts = config.emu-nix.enabledSystems;
     };
+
+    system = pkgs.stdenv.hostPlatform.system;
+
     skyscraper-sh =
-      withSystem pkgs.stdenv.hostPlatform.system
+      withSystem system
       ({config, ...}: config.packages.Skyscraper.override skyscraperAttrs);
   in {
     options.emu-nix.pegasus = {
@@ -26,9 +33,15 @@
       };
     };
 
-    config.environment.systemPackages = lib.mkIf config.emu-nix.pegasus.enable [
-      pkgs.pegasus-frontend
-      skyscraper-sh
-    ];
+    config = lib.mkIf config.emu-nix.pegasus.enable {
+      nixpkgs.overlays = [
+        self.overlays.pegasus-frontend
+      ];
+
+      environment.systemPackages = [
+        pkgs.pegasus-frontend
+        skyscraper-sh
+      ];
+    };
   };
 }
