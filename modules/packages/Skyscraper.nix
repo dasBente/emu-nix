@@ -22,11 +22,8 @@
         "\n\n"
         (lib.mapAttrsToList toLevel attrs);
 
-      toLaunchCmd = {
-        kind,
-        emulator,
-        ...
-      }:
+      # extracts launch command for skyscraper config depending on emulator type
+      toLaunchCmd = emulator @ {kind, ...}:
         {
           libretro = ''/run/current-system/sw/bin/retroarch -L ${emulator.core} \"{file.path}\"'';
           basic = emulator.cmd;
@@ -34,7 +31,7 @@
 
       parseOpts = _: info:
         sanitize {
-          launch = toLaunchCmd info;
+          launch = toLaunchCmd info.emulator;
           inputFolder = info.inputFolder or null;
         };
 
