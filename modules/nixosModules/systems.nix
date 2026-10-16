@@ -70,6 +70,11 @@
           pkg = pkgs.libretro.mgba;
           core = "mgba";
         });
+
+        psx.emulator = lib.mkDefault (self.lib.Libretro {
+          pkg = pkgs.libretro.beetle-psx;
+          core = "beetle-psx";
+        });
       };
 
       emu-nix.enabledSystems =
